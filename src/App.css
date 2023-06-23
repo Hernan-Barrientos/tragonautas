@@ -17,7 +17,6 @@
 }
 
 .App-header {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,6 +34,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -43,18 +43,18 @@
 
 
 @media screen and (min-width: 600px) {
-.mainTragonautas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1.5rem;
-  color: white;
-  background-color: #15171b;
-  height: 100%;
+  .mainTragonautas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.5rem;
+    color: white;
+    height: 100%;
 
-  margin: auto;
+    margin: auto;
 
-}}
+  }
+}
 
 @media screen and (max-width: 600px) {
   .mainTragonautas {
@@ -63,67 +63,81 @@
     align-items: center;
     font-size: 1.5rem;
     color: white;
-    background-color: #15171b;
     height: 100%;
     width: 100%;
     margin: auto;
- }
+  }
 }
 
 .bannerTragonautas {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   font-size: 1.5rem;
   color: white;
-    border: 2px solid black;
-
   width: 100%;
   padding: 50px 0px 50px 0px;
-  border-bottom: 5px solid #20060e;
-  box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.3);
   background-image: url('./images/tmpg067e4e_.png');
   background-size: 100%;
 
 }
 
-.instagram{
-}
+.instagram {}
 
 
-.insta{
-  width: 200px;
+.insta {
+  width: 150px;
   border-radius: 50%;
 
-  
+
+
 }
 
 @media screen and (max-width: 600px) {
-  .insta{
+  .insta {
     width: 100px;
     border-radius: 50%;
-  
-    
+
+
   }
 }
+@media screen and (min-width: 601px) {
+  .insta {
+    width: 100px;
+    border-radius: 50%;
+    margin-right: 50px;
 
-.whatsapp{
+
+  }
+}
+.whatsapp {}
+
+.wsapp {
+  width: 120px;
+
 }
 
-.wsapp{
-  width: 190px;
+@media screen and (min-width: 601px) {
+  .wsapp {
+    width: 90px;
+    border-radius: 50%;
+    margin-left: 50px;
 
+
+
+  }
 }
 
 @media screen and (max-width: 600px) {
-  .wsapp{
+  .wsapp {
     width: 90px;
     border-radius: 50%;
-  
-    
+
+
   }
 }
+
 .containerLogoTragonautas {
   display: flex;
   flex-direction: row;
@@ -134,79 +148,118 @@
 
 
 .logoTragonautas {
-  width: 100%;
+  width: 350px;
   border-radius: 100%;
   justify-content: center;
-  box-shadow: 0px 0px 100px rgba(238, 32, 145, 0.767);
 }
 
 @media screen and (max-width: 600px) {
   .logoTragonautas {
-    width: 60%;
-    box-shadow: 0px 0px 100px rgba(238, 32, 145, 0.541);
+    width: 150px;
 
   }
 }
 
-.boddyTragonautas{
-  display: flex;
-  flex-grow: 1;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
+.boddyTragonautas {
   text-shadow: 0px 0px 4px rgb(0, 110, 255);
   text-decoration-line: underline;
-  justify-content: space-evenly;
   color: rgb(255, 255, 255);
-    border: 2px solid black;
-
-  flex-basis: calc(33.33% - 20px);
-  background-color: #0d0716;
   width: 100%;
   min-height: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 @media screen and (max-width: 600px) {
-  .boddyTragonautas{
+  .boddyTragonautas {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-basis: calc(50% - 0px);
     flex-direction: row;
     flex-grow: 1;
     width: 100%;
-    
+
   }
 }
 
-.tragosContainer{
+.centeringContainer{
+  display: grid;
+  justify-content: space-evenly;
+ grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 300px)
+  );
+  width: 100%;
+  height: 100%;
+  gap: 5px;
+ 
+}
+
+@media screen and (max-width: 600px) {
+  .centeringContainer{
+    display: grid;
+   grid-template-columns: repeat(
+      auto-fit,
+      minmax(45%, 1fr)
+    );
+    gap: 10px;
+
+  }
+  }
+
+
+.tragosContainer {
+
   display: flex;
   justify-content: center;
   width: 100%;
-  height: 200px;
-  border-radius: 10%;
+  height: 100%;
   background-color: #77117a;
-  background-image: url("./images/trago1.webp");
   background-size: 100%;
-  box-shadow: 0px 0px 10px rgb(30, 129, 0);
 
 }
+
 @media screen and (min-width: 600px) {
-  .tragosContainer{
-    margin: 10px 0px 10px 0px;
-    flex-basis: calc(33.33% - 20px);
+  .tragosContainer {
+    flex-basis: calc(25% - 20px);
+
+
   }
 }
 
 @media screen and (max-width: 600px) {
-  .tragosContainer{
-    display: flex;
-    justify-content: center;
-    width: 50%;
- 
+  .tragosContainer {
     background-color: #77117a;
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.418);
-    margin: 5px 0px 5px 0px;
+
+  }
+}
+
+.fotoTragos {
+  width: 100%;
+  height: 100%;
+border-radius: 8px;
+}
+
+
+.tragosContainer:hover {
+  box-shadow: 0px 5px 20px #9f82bd;}
+
+.telefono{
+  width: 100%;
+  text-align: center;
+  text-shadow: 0px 0px 4px rgb(136, 255, 0);
+  color: rgb(255, 255, 255);
+  font-size: 2.5rem;
+  background-color: #5C469C;
+  border-top: 2px solid #D4ADFC;
+  border-bottom: 3px solid #D4ADFC;
+  margin-bottom: 5px;
+
+}
+@media screen and (max-width: 600px) {
+  .telefono{
+    font-size: 1rem;
 
   }
 }
