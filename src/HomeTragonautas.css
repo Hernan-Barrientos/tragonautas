@@ -1,0 +1,267 @@
+/* Menu.css */
+
+/* Estilos generales */
+
+body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .App-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+  }
+  
+  /* Estilos del header */
+  
+  .header-home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #fff;
+    width: 100%;
+    background-image: url('./images/tmpg067e4e_.png');
+    background-position: center;
+    background-size: cover;
+    height: 200px;
+    padding: 10px 0;
+    text-shadow: 0px 0px 10px rgb(255, 255, 255);
+  }
+  
+  .tragonautas-logo-home {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    border-radius: 50%;
+  }
+  
+  /* Estilos de la sección de información */
+  
+  .informacion {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0px 10px 0px;
+    padding: 10px 0px 10px 0px;
+  }
+  
+  .telefono-home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-top: 10px;
+    color: rgb(240, 240, 240);
+    width: 100%;
+    height: 50px;
+    font-size: 200%;
+    font-weight: bold;
+    text-shadow: 0px 0px 10px rgb(124, 114, 69);
+  }
+  
+
+
+  /* Estilos del botón de la carta */
+  
+  .menurg {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-image: radial-gradient(circle at center, #4d0091, #3c009dd2);
+    width: 200px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    margin-top: 15px;
+    color: rgb(255, 255, 255);
+    font-size: 1.2rem;
+    font-weight: b;
+    text-shadow: 0px 0px 7px rgb(0, 0, 0);
+    cursor: pointer;
+  }
+  
+  /* Estilos de los elementos del menú */
+  
+  .tragonautas-menu-body {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  /* Estilos de los elementos del menú - versión responsive */
+  
+  .relenti-menu-element {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: row;
+    background-color: #ff9500;
+    margin: 10px;
+    border-radius: 10px;
+    min-height: 100px;
+    max-width: 850px;
+    border-bottom: 5px solid #947d5bbd;
+    box-shadow: 1px -1px 15px #929790bd;
+  }
+  
+  .tragonautas-menu-image {
+    display: flex;
+    min-width: 300px;
+    max-width: 300px;
+    background-color: #beb296;
+    border-radius: 0 0 0 10px;
+    box-shadow: inset 1px -1px 15px #947d5bbd;
+  }
+  
+  @media screen and (max-width: 600px) {
+    .relenti-menu-element {
+      border-radius: 10px 10px 0 0;
+      max-width: 100%;
+      min-width: 350px;
+      width: 100%;
+      max-height: 150px;
+    }
+  
+    .tragonautas-menu-image {
+      border-radius: 0;
+      min-width: 100px;
+      max-width: 100px;
+    }
+  }
+  
+  .tragonautas-menu-image-menu {
+    max-width: 150px;
+    max-height: 150px;
+  }
+  
+  /* Otros estilos */
+  
+  .moto {
+    width: auto;
+    height: 40px;
+    object-fit: cover;
+    object-position: center;
+    margin-right: 10px;
+  }
+  
+  /* Estilos de contacto */
+  
+  .telefono-home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-top: 10px;
+    color: rgb(240, 240, 240);
+    width: 100%;
+    height: 50px;
+    font-size: 150%;
+    font-weight: bold;
+    text-shadow: 0px 0px 10px rgb(124, 114, 69);
+  
+  }
+  
+  
+  .telefono-home a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .telefono-home a:hover {
+    color: #e6ffdb;
+    text-decoration: underline;
+  }
+  
+  .dire {
+    color: rgb(255, 255, 255);
+  }
+  
+  /* Estilos de las redes sociales */
+  
+  .wsapplogo {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    -webkit-filter: drop-shadow(5px 5px 5px #222);
+    filter: drop-shadow(0px 0px 5px #797979);
+  }
+  
+  .iglogo {
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+    -webkit-filter: drop-shadow(5px 5px 5px #222);
+    filter: drop-shadow(0px 0px 5px #797979);
+  }
+  
+  /* Media Queries para adaptar a pantallas más pequeñas */
+  
+  @media screen and (max-width: 500px) {
+    .menu {
+      min-width: 100%;
+    }
+  
+    .menu h1 {
+      font-size: 20px;
+    }
+  
+    .category-button {
+      width: 100%;
+      font-size: 1rem;
+    }
+  
+    .item-list {
+      gap: 3px;
+    }
+  
+    .menu-item {
+      max-width: 100%;
+      min-width: 250px;
+    }
+  
+    .item-image-mini {
+      width: 80px;
+      height: 80px;
+    }
+  
+    .menuTitle {
+      font-size: 24px;
+    }
+  
+    .menu-editor .category-button {
+      width: 100%;
+      font-size: 1rem;
+      padding: 8px;
+    }
+  
+    .menu-editor .item-list {
+      gap: 3px;
+    }
+  
+    .menu-editor .menu-item {
+      max-width: 100%;
+      min-width: 250px;
+    }
+  
+    .menu-editor .item-image-mini {
+      width: 80px;
+      height: 80px;
+    }
+  
+    .quilmes-home {
+      font-size: 120%;
+    }
+  
+    .telefono-home {
+      font-size: 100%;
+    }
+  }
+  

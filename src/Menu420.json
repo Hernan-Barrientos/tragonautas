@@ -1,0 +1,435 @@
+[
+    {
+        "name": "TRAGONAUTAS_FROZEN",
+        "items": [
+            {
+                "id": 1,
+                "nombre": "Baileys",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 2,
+                "nombre": "Oreo",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 3,
+                "nombre": "Chocolinas",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 4,
+                "nombre": "Frutilla",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 5,
+                "nombre": "Bon o Bon",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 6,
+                "nombre": "Chocorrón",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            }
+        ]
+    },
+    {
+        "name": "TRAGONAUTAS_DIRECTOS",
+        "items": [
+            {
+                "id": 1,
+                "nombre": "Sex on the Beach",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 2,
+                "nombre": "Destornillador",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 3,
+                "nombre": "Gin Tonic",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 4,
+                "nombre": "Tequila Sunrise",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 5,
+                "nombre": "Trago 420",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 6,
+                "nombre": "Gancia",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 7,
+                "nombre": "Fernet",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 8,
+                "nombre": "Melón con speed",
+                "con_alcohol": 1,
+                "disponible_chico": 0,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 9,
+                "nombre": "Vodka con speed",
+                "con_alcohol": 1,
+                "disponible_chico": 0,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 10,
+                "nombre": "Federico con 2 Speed",
+                "con_alcohol": 1,
+                "disponible_chico": 0,
+                "disponible_grande": 0,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": null,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": 2100
+            }
+        ]
+    },
+    {
+        "name": "TRAGONAUTAS_DAIQUIRIS",
+        "items": [
+            {
+                "id": 1,
+                "nombre": "Frutilla",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": 1,
+                "precio_tamaño_chico_sin_alcohol": 450,
+                "precio_tamaño_grande_sin_alcohol": 850,
+                "precio_unico": null
+            },
+            {
+                "id": 2,
+                "nombre": "Frutos Rojos",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": 1,
+                "precio_tamaño_chico_sin_alcohol": 450,
+                "precio_tamaño_grande_sin_alcohol": 850,
+                "precio_unico": null
+            },
+            {
+                "id": 3,
+                "nombre": "Durazno",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": 1,
+                "precio_tamaño_chico_sin_alcohol": 450,
+                "precio_tamaño_grande_sin_alcohol": 850,
+                "precio_unico": null
+            },
+            {
+                "id": 4,
+                "nombre": "Ananá",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": 1,
+                "precio_tamaño_chico_sin_alcohol": 450,
+                "precio_tamaño_grande_sin_alcohol": 850,
+                "precio_unico": null
+            },
+            {
+                "id": 5,
+                "nombre": "Maracuyá",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": 1,
+                "precio_tamaño_chico_sin_alcohol": 450,
+                "precio_tamaño_grande_sin_alcohol": 850,
+                "precio_unico": null
+            }
+        ]
+    },
+    {
+        "name": "TRAGONAUTAS_CERVECITAS",
+        "items": [
+            {
+                "id": 1,
+                "nombre": "Laton Schneider",
+                "con_alcohol": 1,
+                "disponible_chico": 0,
+                "disponible_grande": 0,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": null,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": 650
+            },
+            {
+                "id": 2,
+                "nombre": "Laton Heineken",
+                "con_alcohol": 1,
+                "disponible_chico": 0,
+                "disponible_grande": 0,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": null,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": 900
+            }
+        ]
+    },
+    {
+        "name": "TRAGONAUTAS_CAIPIS",
+        "items": [
+            {
+                "id": 1,
+                "nombre": "Caipiriña",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 2,
+                "nombre": "Caipiroska",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 550,
+                "precio_tamaño_grande": 1000,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 3,
+                "nombre": "Maracuyita",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 4,
+                "nombre": "Caipifrut",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            },
+            {
+                "id": 5,
+                "nombre": "CaipiBlue",
+                "con_alcohol": 1,
+                "disponible_chico": 1,
+                "disponible_grande": 1,
+                "precio_tamaño_chico": 600,
+                "precio_tamaño_grande": 1100,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": null
+            }
+        ]
+    },
+    {
+        "name": "CIGARRILLOS",
+        "items": [
+            {
+                "id": 1,
+                "nombre": "Lucky Convertible X12",
+                "con_alcohol": 0,
+                "disponible_chico": 0,
+                "disponible_grande": 0,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": null,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": 520
+            },
+            {
+                "id": 2,
+                "nombre": "Philips Morris X12",
+                "con_alcohol": 0,
+                "disponible_chico": 0,
+                "disponible_grande": 0,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": null,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": 520
+            },
+            {
+                "id": 3,
+                "nombre": "Red Poin x20",
+                "con_alcohol": 0,
+                "disponible_chico": 0,
+                "disponible_grande": 0,
+                "precio_tamaño_chico": null,
+                "precio_tamaño_grande": null,
+                "sin_alcohol": null,
+                "precio_tamaño_chico_sin_alcohol": null,
+                "precio_tamaño_grande_sin_alcohol": null,
+                "precio_unico": 350
+            }
+        ]
+    }
+]

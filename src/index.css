@@ -1,16 +1,31 @@
 body {
+
+  align-items: center;
+  min-height: 100%;
+  min-width: 350px;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:'Courier New', Courier, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  justify-content: center;
-  background-color: #0C134F;
+  background-attachment: fixed;
+background-color:  rgb(17 4 18);
+background-image: url('./images/background-of-hand-drawn-star-seamless-pattern-free-vector.png');
+background-size: 15%;
+background-repeat: repeat;
 
 }
+
+/*#170f29 para el bc*/
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+button{
+  cursor: pointer;
+}
+
+a {
+  cursor: pointer;
+  text-decoration: none;
 }
