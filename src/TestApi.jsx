@@ -1,312 +1,289 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useReducer, useEffect, useCallback } from 'react';
 import './Menu.css';
 import logo from './images/logo-negro-1-240x241.png';
 import logotr from './images/tragonautasLogo.png';
-import longlogo from './images/logo-horiz-negro.png';
-import wslogo from './images/whatsapp-logo-png-0.png';
-import iglogo from './images/ig.webp';
-import mapslogo from './images/Google_Maps_Icon.webp';
-import bike from './images/delivery.png';
+
+const ServerUrl = "http://localhost:3001";
+
+const initialState = {
+  claveAdmin: sessionStorage.getItem('claveAdmin') || undefined,
+  categories: [],
+  form: {
+    'nombre de item': '',
+    'item Con Alcohol': false,
+    'disponible Chico': true,
+    'disponible Grande': true,
+    'precio tamaño Chico': 0,
+    'precio tamaño Grande': 0,
+    'sin Alcohol': false,
+    'precio tamaño Chico Sin Alcohol': 0,
+    'precio tamaño Grande Sin Alcohol': 0,
+    'precio Unico': 0,
+    'list Order': 0,
+  },
+  editedItem: null,
+  error: null,
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_CLAVE_ADMIN':
+      return { ...state, claveAdmin: action.payload };
+    case 'SET_CATEGORIES':
+      return { ...state, categories: action.payload };
+    case 'UPDATE_FORM':
+      return { ...state, form: { ...state.form, ...action.payload } };
+    case 'SET_EDITED_ITEM':
+      return { ...state, editedItem: action.payload };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
+    case 'RESET_FORM':
+      return { ...state, form: initialState.form };
+    default:
+      return state;
+  }
+};
 
 const MenuRG = () => {
-  const [categories, setCategories] = useState([]);
-  const categoria = useRef(null);
-  const [categoryName, setCategoryName] = useState('');
-  const [itemName, setItemName] = useState('');
-  const [itemConAlcohol, setItemConAlcohol] = useState(false);
-  const [disponibleChico, setDisponibleChico] = useState(true);
-  const [disponibleGrande, setDisponibleGrande] = useState(true);
-  const [preciotamañoChico, setPreciotamañoChico] = useState(0);
-  const [preciotamañoGrande, setPreciotamañoGrande] = useState(0);
-  const [sinAlcohol, setSinAlcohol] = useState(false);
-  const [preciotamañoChicoSinAlcohol, setPreciotamañoChicoSinAlcohol] = useState(0);
-  const [preciotamañoGrandeSinAlcohol, setPreciotamañoGrandeSinAlcohol] = useState(0);
-  const [precioUnico, setPrecioUnico] = useState(0);
-  const [listOrder, setListOrder] = useState(0);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [itemImage, setItemImage] = useState('logo-negro-1-240x241.png');
-  const [laPalabra, setLaPalabra] = useState('');
-  const [editedItem, setEditedItem] = useState(null);
-
-  const ServerUrl = "https://api.tragonautas420.com.ar";
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch(`${ServerUrl}/categories`);
       const data = await response.json();
-      setCategories(data);
-    } catch (error) {
-      alert("NO SE PUDO REALIZAR LA CONEXION");
+      dispatch({ type: 'SET_CATEGORIES', payload: data });
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'No se pudo conectar al servidor' });
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const moveItem = async (categoryId, fromIndex, toIndex) => {
+    const category = state.categories.find(c => c.id === categoryId);
+    if (!category || fromIndex < 0 || fromIndex >= category.items.length || toIndex < 0 || toIndex >= category.items.length) return;
+
+    const items = [...category.items];
+    const [movedItem] = items.splice(fromIndex, 1);
+    items.splice(toIndex, 0, movedItem);
+    items.forEach((item, index) => item.ListOrder = index);
+
+    try {
+      const orderedIds = items.map(item => item.id);
+      const response = await fetch(`${ServerUrl}/categories/${categoryId}/items/reorder`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          claveSecreta: state.claveAdmin,
+          orderedIds
+        })
+      });
+      if (response.ok) {
+        const updatedCategories = state.categories.map(cat =>
+          cat.id === categoryId ? { ...cat, items } : cat
+        );
+        dispatch({ type: 'SET_CATEGORIES', payload: updatedCategories });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Error al reordenar los ítems' });
+      }
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
+    }
+  };
+
+  const handleSendClave = async () => {
+    const clave = prompt('Ingrese la clave de administrador:');
+    if (!clave) return;
+    try {
+      const response = await fetch(`${ServerUrl}/passint`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clave }),
+      });
+      const data = await response.json();
+      if (data.valid) {
+        dispatch({ type: 'SET_CLAVE_ADMIN', payload: clave });
+        sessionStorage.setItem('claveAdmin', clave);
+        alert('Clave correcta. Acceso concedido.');
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Clave incorrecta' });
+      }
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al verificar la clave' });
     }
   };
 
   const handleCategoryClick = (categoryId) => {
-    const updatedCategories = categories.map((category) =>
-      category.name === categoryId ? { ...category, selected: !category.selected } : { ...category, selected: false }
-    );
-    setCategories(updatedCategories);
+    dispatch({
+      type: 'SET_CATEGORIES',
+      payload: state.categories.map((category) => ({
+        ...category,
+        selected: category.id === categoryId ? !category.selected : false,
+      })),
+    });
   };
-
-  const definirPalabra = async () => {
-    const pass = await prompt('Ingrese la clave');
-    setLaPalabra(pass);
-    localStorage.setItem('clave', pass);
-  };
-
-  useEffect(() => {
-    const savedClave = localStorage.getItem('clave');
-    if (savedClave) {
-      setLaPalabra(savedClave);
-    }
-  }, []);
-  
-
 
   const handleAddCategory = async () => {
-    const newCategoryName = prompt('Ingrese el nombre de la categoría:').replace(/\s+/g, '_');
-    if (newCategoryName) {
+    const newCategoryName = prompt('Ingrese el nombre de la categoría:');
+    if (!newCategoryName) return;
+    try {
       const response = await fetch(`${ServerUrl}/categories`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          categoryName: newCategoryName,
-          claveSecreta: laPalabra,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryName: newCategoryName, claveSecreta: state.claveAdmin }),
       });
       if (response.ok) {
-        const newCategory = await response.json();
-        setCategories((prevCategories) => [
-          ...prevCategories,
-          { ...newCategory, selected: false },
-        ]);
+        await fetchCategories();
       } else {
-        alert('Error al agregar la categoría. Contraseña incorrecta.');
+        dispatch({ type: 'SET_ERROR', payload: 'Error al agregar la categoría' });
       }
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
     }
   };
 
-  const handleEditCategory = async (categoryId, categoryNameToUpdate) => {
-    if (categoryNameToUpdate) {
-      const response = await fetch(
-        `${ServerUrl}/categories/${categoryId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            categoryName: categoryNameToUpdate,
-            claveSecreta: laPalabra,
-          }),
-        }
-      );
+  const handleEditCategory = async (categoryId) => {
+    if (!state.form['nombre de categoria']) return;
+    try {
+      const response = await fetch(`${ServerUrl}/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryName: state.form['nombre de categoria'], claveSecreta: state.claveAdmin }),
+      });
       if (response.ok) {
-        const updatedCategory = await response.json();
-        setCategories((prevCategories) =>
-          prevCategories.map((category) =>
-            category.id === updatedCategory.id ? updatedCategory : category
-          )
-        );
-        window.alert('Categoría modificada correctamente');
+        await fetchCategories();
+        alert('Categoría modificada correctamente');
       } else {
-        alert('Error al modificar la categoría. Contraseña incorrecta.');
+        dispatch({ type: 'SET_ERROR', payload: 'Error al modificar la categoría' });
       }
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
     }
   };
 
   const handleDeleteCategory = async (categoryId) => {
-    if (window.confirm('¿Desea eliminar la categoría?')) {
+    if (!window.confirm(`¿Desea eliminar la categoría: ${categoryId}?`)) return;
+    try {
       const response = await fetch(`${ServerUrl}/categories/${categoryId}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          claveSecreta: laPalabra
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claveSecreta: state.claveAdmin }),
       });
       if (response.ok) {
-        setCategories((prevCategories) =>
-          prevCategories.filter((category) => category.id !== categoryId)
-        );
+        await fetchCategories();
       } else {
-        alert('Error al eliminar la categoría. Contraseña incorrecta.');
+        dispatch({ type: 'SET_ERROR', payload: 'Error al eliminar la categoría' });
       }
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
     }
   };
 
   const handleAddItem = async (categoryId) => {
-    const newItemName = itemName;
-    const newItemPrice = parseFloat(precioUnico); // Assuming precioUnico is the new price field
-    const newItemDescription = ''; // Empty description since it's not included in the new fields
-
-    if (newItemName && !isNaN(newItemPrice)) {
-      const response = await fetch(
-        `${ServerUrl}/categories/${categoryId}/items`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            nombre: newItemName,
-            con_alcohol: itemConAlcohol,
-            disponible_chico: disponibleChico,
-            disponible_grande: disponibleGrande,
-            precio_tamaño_chico: preciotamañoChico,
-            precio_tamaño_grande: preciotamañoGrande,
-            sin_alcohol: sinAlcohol,
-            precio_tamaño_chico_sin_alcohol: preciotamañoChicoSinAlcohol,
-            precio_tamaño_grande_sin_alcohol: preciotamañoGrandeSinAlcohol,
-            precio_unico: newItemPrice, // Using the new price field here
-            claveSecreta: laPalabra,
-          }),
-        }
-      );
+    const { 'nombre de item': nombre, 'precio Unico': precioUnico, 'list Order': listOrder } = state.form;
+    if (!nombre || (parseFloat(precioUnico) === 0 && !state.form['disponible Chico'] && !state.form['disponible Grande'])) return;
+    try {
+      const response = await fetch(`${ServerUrl}/categories/${categoryId}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre,
+          con_alcohol: state.form['item Con Alcohol'],
+          disponible_chico: state.form['disponible Chico'],
+          disponible_grande: state.form['disponible Grande'],
+          precio_tamaño_chico: parseFloat(state.form['precio tamaño Chico']),
+          precio_tamaño_grande: parseFloat(state.form['precio tamaño Grande']),
+          sin_alcohol: state.form['sin Alcohol'],
+          precio_tamaño_chico_sin_alcohol: parseFloat(state.form['precio tamaño Chico Sin Alcohol']),
+          precio_tamaño_grande_sin_alcohol: parseFloat(state.form['precio tamaño Grande Sin Alcohol']),
+          precio_unico: parseFloat(state.form['precio Unico']),
+          ListOrder: parseInt(listOrder),
+          claveSecreta: state.claveAdmin
+        }),
+      });
       if (response.ok) {
-        const newItem = await response.json();
-        setCategories((prevCategories) =>
-          prevCategories.map((category) =>
-            category.id === categoryId
-              ? { ...category, items: [...category.items, newItem] }
-              : category
-          )
-        );
+        await fetchCategories();
+        dispatch({ type: 'RESET_FORM' });
       } else {
-        alert('Error al agregar el item. Contraseña incorrecta.');
+        dispatch({ type: 'SET_ERROR', payload: 'Error al agregar el item' });
       }
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
     }
   };
 
   const handleEditItem = async (categoryId, itemId) => {
-    const updatedItemName = itemName;
-    const updatedItemPrice = parseFloat(precioUnico); // Assuming precioUnico is the new price field
-
-
-
-      const response = await fetch(
-        `${ServerUrl}/categories/${categoryId}/items/${itemId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            nombre: updatedItemName,
-            con_alcohol: itemConAlcohol,
-            disponible_chico: disponibleChico,
-            disponible_grande: disponibleGrande,
-            precio_tamaño_chico: preciotamañoChico,
-            precio_tamaño_grande: preciotamañoGrande,
-            sin_alcohol: sinAlcohol,
-            precio_tamaño_chico_sin_alcohol: preciotamañoChicoSinAlcohol,
-            precio_tamaño_grande_sin_alcohol: preciotamañoGrandeSinAlcohol,
-            precio_unico: updatedItemPrice, // Using the new price field here
-            ListOrder: listOrder,
-            claveSecreta: laPalabra,
-          }),
-        }
-      );
+    const { 'nombre de item': nombre, 'precio Unico': precioUnico, 'list Order': listOrder } = state.form;
+    if (!nombre || (parseFloat(precioUnico) === 0 && !state.form['disponible Chico'] && !state.form['disponible Grande'])) return;
+    try {
+      const response = await fetch(`${ServerUrl}/categories/${categoryId}/items/${itemId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre,
+          con_alcohol: state.form['item Con Alcohol'],
+          disponible_chico: state.form['disponible Chico'],
+          disponible_grande: state.form['disponible Grande'],
+          precio_tamaño_chico: parseFloat(state.form['precio tamaño Chico']),
+          precio_tamaño_grande: parseFloat(state.form['precio tamaño Grande']),
+          sin_alcohol: state.form['sin Alcohol'],
+          precio_tamaño_chico_sin_alcohol: parseFloat(state.form['precio tamaño Chico Sin Alcohol']),
+          precio_tamaño_grande_sin_alcohol: parseFloat(state.form['precio tamaño Grande Sin Alcohol']),
+          precio_unico: parseFloat(state.form['precio Unico']),
+          ListOrder: parseInt(listOrder),
+          claveSecreta: state.claveAdmin
+        }),
+      });
       if (response.ok) {
-        const updatedItem = await response.json();
-        setCategories((prevCategories) =>
-          prevCategories.map((category) =>
-            category.id === categoryId
-              ? {
-                  ...category,
-                  items: category.items.map((item) =>
-                    item.id === itemId ? updatedItem : item
-                  ),
-                }
-              : category
-          )
-        );
-        setEditedItem(null);
+        await fetchCategories();
+        dispatch({ type: 'SET_EDITED_ITEM', payload: null });
+        dispatch({ type: 'RESET_FORM' });
       } else {
-        alert('Error al editar el item. Contraseña incorrecta.');
+        dispatch({ type: 'SET_ERROR', payload: 'Error al editar el item' });
       }
-
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
+    }
   };
 
   const handleDeleteItem = async (categoryId, itemId) => {
-    if (window.confirm('¿Desea eliminar este item?')) {
-      const response = await fetch(
-        `${ServerUrl}/categories/${categoryId}/items/${itemId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            claveSecreta: laPalabra
-          }),
-        }
-      );
-      if (response.ok) {
-        setCategories((prevCategories) =>
-          prevCategories.map((category) =>
-            category.id === categoryId
-              ? {
-                  ...category,
-                  items: category.items.filter((item) => item.id !== itemId),
-                }
-              : category
-          )
-        );
-      } else {
-        alert('Error al eliminar el item. Contraseña incorrecta.');
-      }
-    }
-  };
-
-  const handleMoveItem = async (categoryId, itemId, newIndex) => {
+    if (!window.confirm('¿Desea eliminar este item?')) return;
     try {
-      const response = await fetch(
-        `${ServerUrl}/categories/${categoryId}/items/${itemId}/move`, // Updated endpoint URL
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            newIndex,
-            claveSecreta: laPalabra
-          }),
-        }
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error);
+      const response = await fetch(`${ServerUrl}/categories/${categoryId}/items/${itemId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claveSecreta: state.claveAdmin }),
+      });
+      if (response.ok) {
+        await fetchCategories();
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Error al eliminar el item' });
       }
-      // No need to call response.json() again as we already called it to check response.ok
-      const updatedCategories = await response.json();
-      setCategories(updatedCategories); // Assuming the API now returns the updated categories
-    } catch (error) {
-      alert(error.message);
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
     }
   };
-  
 
   const handleEditItemClick = (item) => {
-    setEditedItem(item);
-    setItemName(item.nombre);
-    setItemConAlcohol(item.con_alcohol);
-    setDisponibleChico(item.disponible_chico);
-    setDisponibleGrande(item.disponible_grande);
-    setPreciotamañoChico(item.precio_tamaño_chico);
-    setPreciotamañoGrande(item.precio_tamaño_grande);
-    setSinAlcohol(item.sin_alcohol);
-    setPreciotamañoChicoSinAlcohol(item.precio_tamaño_chico_sin_alcohol);
-    setPreciotamañoGrandeSinAlcohol(item.precio_tamaño_grande_sin_alcohol);
-    setPrecioUnico(item.precio_unico);
-    setListOrder(item.ListOrder)
-    
+    dispatch({ type: 'SET_EDITED_ITEM', payload: item });
+    dispatch({
+      type: 'UPDATE_FORM',
+      payload: {
+        'nombre de item': item.nombre || '',
+        'item Con Alcohol': !!item.con_alcohol,
+        'disponible Chico': !!item.disponible_chico,
+        'disponible Grande': !!item.disponible_grande,
+        'precio tamaño Chico': item.precio_tamaño_chico.toString() || '0',
+        'precio tamaño Grande': item.precio_tamaño_grande.toString() || '0',
+        'sin Alcohol': !!item.sin_alcohol,
+        'precio tamaño Chico Sin Alcohol': item.precio_tamaño_chico_sin_alcohol.toString() || '0',
+        'precio tamaño Grande Sin Alcohol': item.precio_tamaño_grande_sin_alcohol.toString() || '0',
+        'precio Unico': item.precio_unico.toString() || '0',
+        'list Order': item.ListOrder.toString() || '0',
+      },
+    });
   };
 
   return (
@@ -314,289 +291,117 @@ const MenuRG = () => {
       <div className="App">
         <header className="tragonautas-menu-header">
           <img src={logotr} className="tragonautas-logo" alt="logo" />
-          <button className="pass-button" onClick={definirPalabra}>Enviar clave</button>
+          <button className="pass-button" onClick={handleSendClave}>Enviar clave</button>
         </header>
       </div>
 
+      {state.error && <div className="error">{state.error}</div>}
+
       <ul className="category-list">
-        {categories.map((category, index) => (
-          <li key={category.name}>
+        {state.categories.map((category) => (
+          <li key={category.id}>
             <div className="category-header">
               <div
                 className={`category-button ${category.selected ? 'active' : ''}`}
-                onClick={() => handleCategoryClick(category.name)}
+                onClick={() => handleCategoryClick(category.id)}
               >
                 <div className="category-actions">
                   <input
-                    ref={categoria}
-                    key={categories.id}
                     type="text"
-                    name={`inputCategory${index}`}
                     placeholder={category.name}
-                    onChange={(e) => setCategoryName(e.target.value)}
+                    value={state.form['nombre de categoria'] || ''}
+                    onChange={(e) =>
+                      dispatch({ type: 'UPDATE_FORM', payload: { 'nombre de categoria': e.target.value } })
+                    }
                   />
-                  <button
-                    className="edit-button category-section"
-                    onClick={() => {
-                      console.log("category.name en este momento: ", category.name)
-                      handleEditCategory(category.name, categoryName);
-                    }}
-                  >
-                    ✅
-                  </button>
-                  <button
-                    className="delete-button category-section"
-                    onClick={() => handleDeleteCategory(category.name)}
-                  >
-                    ❌
-                  </button>
-
+                  <button className="edit-button category-section" onClick={() => handleEditCategory(category.id)}>✅</button>
+                  <button className="delete-button category-section" onClick={() => handleDeleteCategory(category.id)}>❌</button>
                 </div>
               </div>
             </div>
             {category.selected && (
               <ul className="item-list">
-                {category.items.map((item, itemIndex) => (
+                {category.items.map((item, index) => (
                   <li key={item.id} className="menu-item">
-                    <div className='container-item-details'>
+                    <div className="container-item-details">
                       <div className="item-details">
-                        {editedItem && editedItem.id === item.id ? (
+                        {state.editedItem && state.editedItem.id === item.id ? (
                           <>
-                            <div className='update-input'>
-                              <span className='item-property'>nombre:</span>
-                              <input
-                                className='inputItems'
-                                type="text"
-                                name={`inputCategory${index}`}
-                                placeholder={item.nombre}
-                                value={itemName}
-                                onChange={(e) => setItemName(e.target.value)}
-                              />
-                            </div>
-                            <div className='update-input'>
-                              <span className='item-property'>con_alcohol:</span>
-                              <input
-                                className='inputItems'
-                                type="checkbox"
-                                name={`inputCategory${index}`}
-                                checked={itemConAlcohol}
-                                onChange={(e) => setItemConAlcohol(e.target.checked)}
-                              />
-                            </div>
-                            <div className='update-input'>
-                              <span className='item-property'>disponible_chico:</span>
-                              <input
-                                className='inputItems'
-                                type="checkbox"
-                                name={`inputCategory${index}`}
-                                checked={disponibleChico}
-                                onChange={(e) => setDisponibleChico(e.target.checked)}
-                              />
-                            </div>
-                            <div className='update-input'>
-                              <span className='item-property'>disponible_grande:</span>
-                              <input
-                                className='inputItems'
-                                type="checkbox"
-                                name={`inputCategory${index}`}
-                                checked={disponibleGrande}
-                                onChange={(e) => setDisponibleGrande(e.target.checked)}
-                              />
-                            </div>
-                            {/*(id, name, con_alcohol, disponible_chico, disponible_grande, precio_tamaño_chico, precio_tamaño_grande, sin_alcohol, precio_tamaño_chico_sin_alcohol, precio_tamaño_grande_sin_alcohol, precio_unico) */}
-                            <div className='update-input'>
-                              <span className='item-property'>precio_tamaño_chico:</span>
-                              <input
-                                className='inputItems'
-                                type="number"
-                                name={`inputCategory${index}`}
-                                placeholder={`$${item.precio_tamaño_chico}`}
-                                value={preciotamañoChico}
-                                onChange={(e) => setPreciotamañoChico(e.target.value)}
-                              />
-                            </div>{console.log("item es: ",item)}
-                            <div className='update-input'>
-                              <span className='item-property'>precio_tamaño_grande:</span>
-                              <input
-                                className='inputItems'
-                                type="number"
-                                name={`inputCategory${index}`}
-                                placeholder={`$${item.precio_tamaño_grande}`}
-                                value={preciotamañoGrande}
-                                onChange={(e) => setPreciotamañoGrande(e.target.value)}
-                              />
-                            </div>
-                            <div className='update-input'>
-                              <span className='item-property'>sin_alcohol:</span>
-                              <input
-                                className='inputItems'
-                                type="checkbox"
-                                name={`inputCategory${index}`}
-                                checked={sinAlcohol}
-                                onChange={(e) => setSinAlcohol(e.target.checked)}
-                              />
-                            </div>
-                            <div className='update-input'>
-                              <span className='item-property'>precio_tamaño_chico_sin_alcohol:</span>
-                              <input
-                                className='inputItems'
-                                type="number"
-                                name={`inputCategory${index}`}
-                                placeholder={`$${item.precio_tamaño_chico_sin_alcohol}`}
-                                value={preciotamañoChicoSinAlcohol}
-                                onChange={(e) => setPreciotamañoChicoSinAlcohol(e.target.value)}
-                              />
-                            </div>
-                            <div className='update-input'>
-                              <span className='item-property'>precio_tamaño_grande_sin_alcohol:</span>
-                              <input
-                                className='inputItems'
-                                type="number"
-                                name={`inputCategory${index}`}
-                                placeholder={`$${item.precio_tamaño_grande_sin_alcohol}`}
-                                value={preciotamañoGrandeSinAlcohol}
-                                onChange={(e) => setPreciotamañoGrandeSinAlcohol(e.target.value)}
-                              />
-                            </div>
-                            <div className='update-input'>
-                              <span className='item-property'>precio_unico:</span>
-                              <input
-                                className='inputItems'
-                                type="number"
-                                name={`inputCategory${index}`}
-                                placeholder={`$${item.precio_unico}`}
-                                value={precioUnico}
-                                onChange={(e) => setPrecioUnico(e.target.value)}
-                              />
-                              <span className='item-property'>orden en la lista:</span>
-                              <input
-                                className='inputItems'
-                                type="number"
-                                name={`inputCategory${index}`}
-                                placeholder={`${item.ListOrder}`}
-                                value={listOrder}
-                                onChange={(e) => setListOrder(e.target.value)}
-                              />
-                            </div>
-                            <div className="item-actions">
-                              <button
-                                className="edit-button inputedit"
-                                onClick={() => handleEditItem(category.name, item.id)}
-                              >
-                                Aceptar edicion ✅
-                              </button>
-                       
-                            </div>
+                            {Object.entries(state.form).map(([key, value]) => (
+                              <div key={key} className="update-input">
+                                <span className="item-property">{key}:</span>
+                                {typeof value === 'boolean' ? (
+                                  <input
+                                    className="inputItems"
+                                    type="checkbox"
+                                    checked={value}
+                                    onChange={(e) =>
+                                      dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.checked } })
+                                    }
+                                  />
+                                ) : (
+                                  <input
+                                    className="inputItems"
+                                    type={key.includes('precio') || key === 'list Order' ? 'number' : 'text'}
+                                    value={value}
+                                    placeholder={key}
+                                    onChange={(e) =>
+                                      dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.value } })
+                                    }
+                                  />
+                                )}
+                              </div>
+                            ))}
+                            <button className="edit-button inputedit" onClick={() => handleEditItem(category.id, item.id)}>
+                              Aceptar edición ✅
+                            </button>
                           </>
                         ) : (
-                          <>
-                            <div className="item-actions">
-                              <div className='item-name'>{item.nombre}</div>
-
+                          <div className="item-name">
+                            {item.nombre}
+                            <div className="item-actions-container">
+                              <div className="item-actions">
+                                <button title='Editar' className="edit-button" onClick={() => handleEditItemClick(item)}>✏️</button>
+                                <button title='Eliminar' className="delete-button" onClick={() => handleDeleteItem(category.id, item.id)}>❌</button>
+                                <button title="Subir" className="delete-button" onClick={() => moveItem(category.id, index, index - 1)}>⬆️</button>
+                                <button title="Bajar" className="delete-button" onClick={() => moveItem(category.id, index, index + 1)}>⬇️</button>
+                              </div>
                             </div>
-                          </>
+                          </div>
                         )}
                       </div>
-                      <div className='centrador'></div>
-                      <button
-                        className="edit-button"
-                        onClick={() => handleEditItemClick(item)}
-                      >
-                        Editar ✏️
-                      </button>
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDeleteItem(category.name, item.id)}
-                      >
-                        Eliminar ❌
-                      </button>
-                     
                     </div>
                   </li>
                 ))}
                 <li className="add-item">
                   AGREGAR NUEVO ELEMENTO
-                  <input
-                    type="text"
-                    name={`inputCategory${index}`}
-                    placeholder={'nombre'}
-                    onChange={(e) => setItemName(e.target.value)}
-                  />
-                  Activar precios "con alcohol"<input
-                    type="checkbox"
-                    name={`inputCategory${index}`}
-                    checked={itemConAlcohol}
-                    onChange={(e) => setItemConAlcohol(e.target.checked)}
-                  />
-                 precio grande<input
-                    type="checkbox"
-                    name={`inputCategory${index}`}
-                    checked={disponibleChico}
-                    onChange={(e) => setDisponibleChico(e.target.checked)}
-                  />
-                 precio chico<input
-                    type="checkbox"
-                    name={`inputCategory${index}`}
-                    checked={disponibleGrande}
-                    onChange={(e) => setDisponibleGrande(e.target.checked)}
-                  />
-                  <input
-                    type="number"
-                    name={`inputCategory${index}`}
-                    placeholder={'precio_tamaño_chico'}
-                    onChange={(e) => setPreciotamañoChico(e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    name={`inputCategory${index}`}
-                    placeholder={'precio_tamaño_grande'}
-                    onChange={(e) => setPreciotamañoGrande(e.target.value)}
-                  />
-                 <input
-                    type="checkbox"
-                    name={`inputCategory${index}`}
-                    checked={sinAlcohol}
-                    onChange={(e) => setSinAlcohol(e.target.checked)}
-                  />Activar precios "sin alcohol" 
-                  <input
-                    type="number"
-                    name={`inputCategory${index}`}
-                    placeholder={'precio_tamaño_chico_sin_alcohol'}
-                    onChange={(e) => setPreciotamañoChicoSinAlcohol(e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    name={`inputCategory${index}`}
-                    placeholder={'precio_tamaño_grande_sin_alcohol'}
-                    onChange={(e) => setPreciotamañoGrandeSinAlcohol(e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    name={`inputCategory${index}`}
-                    placeholder={'precio_unico'}
-                    onChange={(e) => setPrecioUnico(e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    name={`inputCategory${index}`}
-                    placeholder={'orden_del_item'}
-                    onChange={(e) => setListOrder(e.target.value)}
-                  />
-                  <button
-                    className="add-button"
-                    onClick={() => handleAddItem(category.name)}
-                  >
-                    AGREGAR ELEMENTO ➕
-                  </button>
+                  {Object.entries(state.form).map(([key, value]) => (
+                    <div key={key}>
+                      <label>{key}</label>
+                      {typeof value === 'boolean' ? (
+                        <input
+                          type="checkbox"
+                          checked={value}
+                          onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.checked } })}
+                        />
+                      ) : (
+                        <input
+                          type={key.includes('precio') || key === 'list Order' ? 'number' : 'text'}
+                          value={value}
+                          placeholder={key}
+                          onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.value } })}
+                        />
+                      )}
+                    </div>
+                  ))}
+                  <button className="add-button" onClick={() => handleAddItem(category.id)}>AGREGAR ELEMENTO ➕</button>
                 </li>
               </ul>
             )}
           </li>
         ))}
-         <li className="add-category">
-          <button className="add-category-button" onClick={handleAddCategory}>
-            Agregar categoría
-          </button>
+        <li className="add-category">
+          <button className="add-category-button" onClick={handleAddCategory}>Agregar categoría</button>
         </li>
       </ul>
     </div>

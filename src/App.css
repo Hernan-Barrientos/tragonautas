@@ -4,8 +4,13 @@
   align-items: center;
   justify-content: center;
 }
-.App2{
-  width: 100%;
+.App2 .category-list.whatsapp {
+  display: flex;
+  flex-direction: row;
+  justify-content: center; /* Centra los logos */
+  gap: 15px; /* Espacio entre logos */
+  margin: 10px 0; /* Espacio vertical */
+  width: 100%; /* Asegura que ocupe el ancho del contenedor */
 }
 .App-home{
   display: flex;

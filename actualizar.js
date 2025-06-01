@@ -10,12 +10,13 @@ let categories = [];
 
 app.use(bodyParser.json());
 app.use(cors());
+require('dotenv').config();
 
 const dbConfig = {
-  host: '192.168.0.63',// ip para usar en el hosting: 192.168.0.63
-  user: 'hernan89mb',
-  password: 'Hernan89121289',
-  database: 'tragonautas_menu'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 };
 
 
