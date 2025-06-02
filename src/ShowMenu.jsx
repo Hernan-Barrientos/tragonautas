@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Menu.css';
-import logotr from './images/tragonautasLogo.png';
+import logoCoffee from './images/logo-blanco-1-240x241.png';
 import longlogo from './images/logo-horiz-negro.png';
 import wslogo from './images/whatsapp-logo-png-0.png';
 import iglogo from './images/ig.webp';
@@ -43,7 +43,7 @@ const ShowMenu = () => {
   return (
     <div className="menu tragonautas-menu-body">
       <header className="tragonautas-menu-header">
-        <img src={logotr} className="tragonautas-logo" alt="logo" />
+        <img src={logoCoffee} className="tragonautas-logo" alt="logo" />
       </header>
       <div className="App2">
         <div className='category-list whatsapp'>

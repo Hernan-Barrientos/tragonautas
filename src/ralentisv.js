@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mysql = require('mysql');
+const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 const app = express();
@@ -17,6 +19,8 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   connectionLimit: 10
 });
+
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwt';
 
 const executeQuery = (query, values = []) => {
   return new Promise((resolve, reject) => {
@@ -64,12 +68,31 @@ const loadCategoriesFromDatabase = async () => {
   }
 };
 
-const verificarClave = (req, res, next) => {
-  const { claveSecreta } = req.body;
-  if (claveSecreta === process.env.SECRET_KEY) {
-    return next();
+// Registro y login de admin (simple, solo para ejemplo)
+app.post('/auth/login', [body('clave').isString().notEmpty()], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { clave } = req.body;
+  if (clave === process.env.SECRET_KEY) {
+    const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '8h' });
+    return res.json({ token });
   }
   res.status(401).json({ error: 'Clave incorrecta' });
+});
+
+// Middleware de autenticación JWT
+const requireAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) return res.status(401).json({ error: 'Token requerido' });
+  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Token inválido' });
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Token inválido' });
+    req.user = user;
+    next();
+  });
 };
 
 app.post('/passint', async (req, res) => {
@@ -92,7 +115,11 @@ app.get('/categories', async (req, res) => {
   }
 });
 
-app.post('/categories', verificarClave, async (req, res) => {
+app.post('/categories', requireAuth, [body('categoryName').isString().notEmpty()], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { categoryName } = req.body;
     await executeQuery('INSERT INTO categories (name) VALUES (?)', [categoryName]);
@@ -104,7 +131,11 @@ app.post('/categories', verificarClave, async (req, res) => {
   }
 });
 
-app.put('/categories/:categoryId', verificarClave, async (req, res) => {
+app.put('/categories/:categoryId', requireAuth, [body('categoryName').isString().notEmpty()], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { categoryId } = req.params;
     const { categoryName } = req.body;
@@ -117,7 +148,7 @@ app.put('/categories/:categoryId', verificarClave, async (req, res) => {
   }
 });
 
-app.delete('/categories/:categoryId', verificarClave, async (req, res) => {
+app.delete('/categories/:categoryId', requireAuth, async (req, res) => {
   try {
     const { categoryId } = req.params;
     await executeQuery('DELETE FROM items WHERE category_id = ?', [categoryId]);
@@ -130,7 +161,7 @@ app.delete('/categories/:categoryId', verificarClave, async (req, res) => {
   }
 });
 
-app.put('/categories/:categoryId/items/reorder', verificarClave, async (req, res) => {
+app.put('/categories/:categoryId/items/reorder', requireAuth, async (req, res) => {
   try {
     const { categoryId } = req.params;
     const { orderedIds } = req.body;
@@ -173,7 +204,15 @@ app.put('/categories/:categoryId/items/reorder', verificarClave, async (req, res
   }
 });
 
-app.post('/categories/:categoryId/items', verificarClave, async (req, res) => {
+app.post('/categories/:categoryId/items', requireAuth, [
+  body('nombre').isString().notEmpty(),
+  body('precio_unico').optional().isNumeric(),
+  // Agrega más validaciones según tu modelo
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { categoryId } = req.params;
     const item = { ...req.body };
@@ -196,7 +235,15 @@ app.post('/categories/:categoryId/items', verificarClave, async (req, res) => {
   }
 });
 
-app.put('/categories/:categoryId/items/:itemId', verificarClave, async (req, res) => {
+app.put('/categories/:categoryId/items/:itemId', requireAuth, [
+  body('nombre').isString().notEmpty(),
+  body('precio_unico').optional().isNumeric(),
+  // Agrega más validaciones según tu modelo
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { categoryId, itemId } = req.params;
     const item = { ...req.body };
@@ -214,7 +261,7 @@ app.put('/categories/:categoryId/items/:itemId', verificarClave, async (req, res
   }
 });
 
-app.delete('/categories/:categoryId/items/:itemId', verificarClave, async (req, res) => {
+app.delete('/categories/:categoryId/items/:itemId', requireAuth, async (req, res) => {
   try {
     const { categoryId, itemId } = req.params;
     await executeQuery(
@@ -226,6 +273,24 @@ app.delete('/categories/:categoryId/items/:itemId', verificarClave, async (req, 
   } catch (error) {
     console.error('Error deleting item:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Endpoint para reordenar categorías
+app.put('/categories/order', requireAuth, async (req, res) => {
+  try {
+    const { updatedOrder } = req.body;
+    if (!Array.isArray(updatedOrder)) {
+      return res.status(400).json({ error: 'Formato de orden inválido' });
+    }
+    for (const category of updatedOrder) {
+      await executeQuery('UPDATE categories SET categoryOrder = ? WHERE id = ?', [category.categoryOrder, category.id]);
+    }
+    const categories = await loadCategoriesFromDatabase();
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error('Error updating category order:', error);
+    res.status(500).json({ error: 'Error updating category order' });
   }
 });
 

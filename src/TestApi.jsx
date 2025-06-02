@@ -1,12 +1,12 @@
-import React, { useReducer, useEffect, useCallback } from 'react';
+import React, { useReducer, useEffect, useCallback, useRef, useState } from 'react';
 import './Menu.css';
 import logo from './images/logo-negro-1-240x241.png';
-import logotr from './images/tragonautasLogo.png';
+import logoCoffee from './images/logo-blanco-1-240x241.png';
 
 const ServerUrl = "http://localhost:3001";
 
 const initialState = {
-  claveAdmin: sessionStorage.getItem('claveAdmin') || undefined,
+  token: sessionStorage.getItem('jwtToken') || undefined,
   categories: [],
   form: {
     'nombre de item': '',
@@ -27,8 +27,8 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'SET_CLAVE_ADMIN':
-      return { ...state, claveAdmin: action.payload };
+    case 'SET_TOKEN':
+      return { ...state, token: action.payload };
     case 'SET_CATEGORIES':
       return { ...state, categories: action.payload };
     case 'UPDATE_FORM':
@@ -36,6 +36,8 @@ const reducer = (state, action) => {
     case 'SET_EDITED_ITEM':
       return { ...state, editedItem: action.payload };
     case 'SET_ERROR':
+      // Mostrar el error en un alert antes de actualizar el estado
+      alert(action.payload);
       return { ...state, error: action.payload };
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
@@ -46,6 +48,28 @@ const reducer = (state, action) => {
 
 const MenuRG = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const dragItem = useRef();
+  const dragOverItem = useRef();
+
+  // Detector de dispositivo táctil
+  useEffect(() => {
+    const handleTouchStart = () => {
+      setIsTouchDevice(true);
+    };
+
+    const handleMouseDown = () => {
+      setIsTouchDevice(false);
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('mousedown', handleMouseDown);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, []);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -74,11 +98,8 @@ const MenuRG = () => {
       const orderedIds = items.map(item => item.id);
       const response = await fetch(`${ServerUrl}/categories/${categoryId}/items/reorder`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          claveSecreta: state.claveAdmin,
-          orderedIds
-        })
+        headers: authHeaders(),
+        body: JSON.stringify({ orderedIds })
       });
       if (response.ok) {
         const updatedCategories = state.categories.map(cat =>
@@ -86,34 +107,67 @@ const MenuRG = () => {
         );
         dispatch({ type: 'SET_CATEGORIES', payload: updatedCategories });
       } else {
-        dispatch({ type: 'SET_ERROR', payload: 'Error al reordenar los ítems' });
+        dispatch({ type: 'SET_ERROR', payload: 'Error al ordenar los ítems' });
       }
     } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
     }
   };
 
-  const handleSendClave = async () => {
+  const moveCategory = async (fromIndex, toIndex) => {
+    if (fromIndex < 0 || toIndex < 0 || fromIndex >= state.categories.length || toIndex >= state.categories.length) return;
+
+    const categories = [...state.categories];
+    const [movedCategory] = categories.splice(fromIndex, 1);
+    categories.splice(toIndex, 0, movedCategory);
+    categories.forEach((category, index) => { category.categoryOrder = index; });
+
+    try {
+      const response = await fetch(`${ServerUrl}/categories/order`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ updatedOrder: categories.map(category => ({ id: category.id, categoryOrder: category.categoryOrder })) })
+      });
+      if (response.ok) {
+        dispatch({ type: 'SET_CATEGORIES', payload: categories });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Error al reordenar las categorías' });
+      }
+    } catch {
+      dispatch({ type: 'SET_ERROR', payload: 'Error al conectar con el servidor' });
+    }
+  };
+
+  const handleLogin = async () => {
     const clave = prompt('Ingrese la clave de administrador:');
     if (!clave) return;
     try {
-      const response = await fetch(`${ServerUrl}/passint`, {
+      const response = await fetch(`${ServerUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clave }),
       });
       const data = await response.json();
-      if (data.valid) {
-        dispatch({ type: 'SET_CLAVE_ADMIN', payload: clave });
-        sessionStorage.setItem('claveAdmin', clave);
-        alert('Clave correcta. Acceso concedido.');
+      if (response.ok && data.token) {
+        dispatch({ type: 'SET_TOKEN', payload: data.token });
+        sessionStorage.setItem('jwtToken', data.token);
+        alert('Acceso concedido.');
       } else {
-        dispatch({ type: 'SET_ERROR', payload: 'Clave incorrecta' });
+        dispatch({ type: 'SET_ERROR', payload: data.error || 'Clave incorrecta' });
       }
     } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Error al verificar la clave' });
     }
   };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('jwtToken');
+    dispatch({ type: 'SET_TOKEN', payload: undefined });
+    alert('Sesión cerrada.');
+  };
+
+  // Helper para headers con token
+  const authHeaders = () => state.token ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.token}` } : { 'Content-Type': 'application/json' };
 
   const handleCategoryClick = (categoryId) => {
     dispatch({
@@ -131,8 +185,8 @@ const MenuRG = () => {
     try {
       const response = await fetch(`${ServerUrl}/categories`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryName: newCategoryName, claveSecreta: state.claveAdmin }),
+        headers: authHeaders(),
+        body: JSON.stringify({ categoryName: newCategoryName }),
       });
       if (response.ok) {
         await fetchCategories();
@@ -149,8 +203,8 @@ const MenuRG = () => {
     try {
       const response = await fetch(`${ServerUrl}/categories/${categoryId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryName: state.form['nombre de categoria'], claveSecreta: state.claveAdmin }),
+        headers: authHeaders(),
+        body: JSON.stringify({ categoryName: state.form['nombre de categoria'] }),
       });
       if (response.ok) {
         await fetchCategories();
@@ -163,13 +217,12 @@ const MenuRG = () => {
     }
   };
 
-  const handleDeleteCategory = async (categoryId) => {
-    if (!window.confirm(`¿Desea eliminar la categoría: ${categoryId}?`)) return;
+  const handleDeleteCategory = async (categoryId, categoryName) => {
+    if (!window.confirm(`¿Desea eliminar la categoría ${categoryName} y todos sus elementos?, esta accion no se puede revertir.`)) return;
     try {
       const response = await fetch(`${ServerUrl}/categories/${categoryId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claveSecreta: state.claveAdmin }),
+        headers: authHeaders(),
       });
       if (response.ok) {
         await fetchCategories();
@@ -187,7 +240,7 @@ const MenuRG = () => {
     try {
       const response = await fetch(`${ServerUrl}/categories/${categoryId}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           nombre,
           con_alcohol: state.form['item Con Alcohol'],
@@ -199,8 +252,7 @@ const MenuRG = () => {
           precio_tamaño_chico_sin_alcohol: parseFloat(state.form['precio tamaño Chico Sin Alcohol']),
           precio_tamaño_grande_sin_alcohol: parseFloat(state.form['precio tamaño Grande Sin Alcohol']),
           precio_unico: parseFloat(state.form['precio Unico']),
-          ListOrder: parseInt(listOrder),
-          claveSecreta: state.claveAdmin
+          ListOrder: parseInt(listOrder)
         }),
       });
       if (response.ok) {
@@ -220,7 +272,7 @@ const MenuRG = () => {
     try {
       const response = await fetch(`${ServerUrl}/categories/${categoryId}/items/${itemId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           nombre,
           con_alcohol: state.form['item Con Alcohol'],
@@ -232,8 +284,7 @@ const MenuRG = () => {
           precio_tamaño_chico_sin_alcohol: parseFloat(state.form['precio tamaño Chico Sin Alcohol']),
           precio_tamaño_grande_sin_alcohol: parseFloat(state.form['precio tamaño Grande Sin Alcohol']),
           precio_unico: parseFloat(state.form['precio Unico']),
-          ListOrder: parseInt(listOrder),
-          claveSecreta: state.claveAdmin
+          ListOrder: parseInt(listOrder)
         }),
       });
       if (response.ok) {
@@ -253,8 +304,7 @@ const MenuRG = () => {
     try {
       const response = await fetch(`${ServerUrl}/categories/${categoryId}/items/${itemId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claveSecreta: state.claveAdmin }),
+        headers: authHeaders(),
       });
       if (response.ok) {
         await fetchCategories();
@@ -286,16 +336,107 @@ const MenuRG = () => {
     });
   };
 
-  return (
-    <div className="menu">
-      <div className="App">
-        <header className="tragonautas-menu-header">
-          <img src={logotr} className="tragonautas-logo" alt="logo" />
-          <button className="pass-button" onClick={handleSendClave}>Enviar clave</button>
-        </header>
-      </div>
+  // Drag and drop handlers
+  const handleDragStart = (index) => {
+    dragItem.current = index;
+  };
 
-      {state.error && <div className="error">{state.error}</div>}
+  const handleDragEnter = (index) => {
+    dragOverItem.current = index;
+  };
+
+  const handleDragEnd = async (categoryId) => {
+    const fromIndex = dragItem.current;
+    let toIndex = dragOverItem.current;
+    dragItem.current = null;
+    dragOverItem.current = null;
+    if (fromIndex !== undefined && toIndex !== undefined && fromIndex !== toIndex) {
+      // If dropping below the last item, move to the end
+      const category = state.categories.find(c => c.id === categoryId);
+      if (category && toIndex >= category.items.length) {
+        toIndex = category.items.length - 1;
+      }
+      await moveItem(categoryId, fromIndex, toIndex);
+    }
+  };
+
+  const handleTouchStart = (index) => {
+    dragItem.current = index;
+  };
+
+  const handleTouchMove = (e) => {
+    const touchLocation = e.touches[0];
+    const element = document.elementFromPoint(touchLocation.clientX, touchLocation.clientY);
+    if (element && element.dataset.index) {
+      dragOverItem.current = parseInt(element.dataset.index, 10);
+    } else if (element && element.closest('.menu-item')) {
+      // fallback for nested elements
+      const li = element.closest('.menu-item');
+      if (li && li.dataset.index) {
+        dragOverItem.current = parseInt(li.dataset.index, 10);
+      }
+    }
+  };
+
+  const handleTouchEnd = async (categoryId) => {
+    const fromIndex = dragItem.current;
+    let toIndex = dragOverItem.current;
+    dragItem.current = null;
+    dragOverItem.current = null;
+    if (fromIndex !== undefined && toIndex !== undefined && fromIndex !== toIndex) {
+      const category = state.categories.find(c => c.id === categoryId);
+      if (category && toIndex >= category.items.length) {
+        toIndex = category.items.length - 1;
+      }
+      await moveItem(categoryId, fromIndex, toIndex);
+    }
+  };
+
+  const handleCategoryDragStart = (index) => {
+    dragItem.current = index;
+  };
+
+  const handleCategoryDragEnter = (index) => {
+    dragOverItem.current = index;
+  };
+
+  const handleCategoryDragEnd = async () => {
+    const fromIndex = dragItem.current;
+    const toIndex = dragOverItem.current;
+    dragItem.current = null;
+    dragOverItem.current = null;
+    if (fromIndex !== undefined && toIndex !== undefined && fromIndex !== toIndex) {
+      await moveCategory(fromIndex, toIndex);
+    }
+  };
+
+  const handleCategoryTouchStart = (index) => {
+    dragItem.current = index;
+  };
+
+  const handleCategoryTouchEnd = async () => {
+    const fromIndex = dragItem.current;
+    const toIndex = dragOverItem.current;
+    dragItem.current = null;
+    dragOverItem.current = null;
+    if (fromIndex !== undefined && toIndex !== undefined && fromIndex !== toIndex) {
+      await moveCategory(fromIndex, toIndex);
+    }
+  };
+
+  return (
+    <div className="menu">      <div className="App">        <header className="tragonautas-menu-header">
+          <div className="header-left">
+            <img src={logoCoffee} className="tragonautas-logo" alt="logo" style={{ opacity: 1 }} />
+          </div>
+          <div className="login-container">
+            <button className="pass-button" onClick={state.token ? handleLogout : handleLogin}>
+              {state.token ? 'Cerrar sesion' : 'Iniciar sesión'}
+            </button>
+            <div className={`login-indicator ${state.token ? 'logged-in' : 'logged-out'}`} />
+          </div>
+        </header>
+      </div>      {/* Los errores ahora se muestran como alerts */}
 
       <ul className="category-list">
         {state.categories.map((category) => (
@@ -315,43 +456,70 @@ const MenuRG = () => {
                     }
                   />
                   <button className="edit-button category-section" onClick={() => handleEditCategory(category.id)}>✅</button>
-                  <button className="delete-button category-section" onClick={() => handleDeleteCategory(category.id)}>❌</button>
+                  <button className="delete-button category-section" onClick={() => handleDeleteCategory(category.id,category.name)}>❌</button>
                 </div>
               </div>
             </div>
             {category.selected && (
               <ul className="item-list">
                 {category.items.map((item, index) => (
-                  <li key={item.id} className="menu-item">
+                  <li
+                    key={item.id}
+                    className="menu-item"
+                    onDragOver={e => {
+                      e.preventDefault();
+                      dragOverItem.current = index;
+                    }}
+                    onDragEnter={() => { dragOverItem.current = index; }}
+                    onDragEnd={() => handleDragEnd(category.id)}
+                    onTouchMove={e => {
+                      const touchLocation = e.touches[0];
+                      const element = document.elementFromPoint(touchLocation.clientX, touchLocation.clientY);
+                      if (element && element.dataset.index) {
+                        dragOverItem.current = parseInt(element.dataset.index, 10);
+                      } else if (element && element.closest('.menu-item')) {
+                        // fallback for nested elements
+                        const li = element.closest('.menu-item');
+                        if (li && li.dataset.index) {
+                          dragOverItem.current = parseInt(li.dataset.index, 10);
+                        }
+                      }
+                    }}
+                    onTouchEnd={() => handleTouchEnd(category.id)}
+                    data-index={index}
+                    style={{ cursor: 'default', opacity: state.editedItem && state.editedItem.id === item.id ? 0.5 : 1 }}
+                  >
                     <div className="container-item-details">
                       <div className="item-details">
                         {state.editedItem && state.editedItem.id === item.id ? (
                           <>
-                            {Object.entries(state.form).map(([key, value]) => (
-                              <div key={key} className="update-input">
-                                <span className="item-property">{key}:</span>
-                                {typeof value === 'boolean' ? (
-                                  <input
-                                    className="inputItems"
-                                    type="checkbox"
-                                    checked={value}
-                                    onChange={(e) =>
-                                      dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.checked } })
-                                    }
-                                  />
-                                ) : (
-                                  <input
-                                    className="inputItems"
-                                    type={key.includes('precio') || key === 'list Order' ? 'number' : 'text'}
-                                    value={value}
-                                    placeholder={key}
-                                    onChange={(e) =>
-                                      dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.value } })
-                                    }
-                                  />
-                                )}
-                              </div>
-                            ))}
+                            {Object.entries(state.form)
+                              .filter(([key]) => key !== 'list Order')
+                              .map(([key, value]) => (
+                                <div key={key} className="update-input">
+                                  <span className="item-property">{key}:</span>
+                                  {typeof value === 'boolean' ? (
+                                    <input
+                                      className="inputItems"
+                                      type="checkbox"
+                                      checked={value}
+                                      onChange={(e) =>
+                                        dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.checked } })
+                                      }
+                                    />
+                                  ) : (
+                                    <input
+                                      className="inputItems"
+                                      type={key.includes('precio') ? 'number' : 'text'}
+                                      value={value}
+                                      placeholder={key}
+                                      onChange={(e) =>
+                                        dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.value } })
+                                      }
+                                    />
+                                  )}
+                                </div>
+                              ))}
                             <button className="edit-button inputedit" onClick={() => handleEditItem(category.id, item.id)}>
                               Aceptar edición ✅
                             </button>
@@ -363,8 +531,15 @@ const MenuRG = () => {
                               <div className="item-actions">
                                 <button title='Editar' className="edit-button" onClick={() => handleEditItemClick(item)}>✏️</button>
                                 <button title='Eliminar' className="delete-button" onClick={() => handleDeleteItem(category.id, item.id)}>❌</button>
-                                <button title="Subir" className="delete-button" onClick={() => moveItem(category.id, index, index - 1)}>⬆️</button>
-                                <button title="Bajar" className="delete-button" onClick={() => moveItem(category.id, index, index + 1)}>⬇️</button>
+                                <button
+                                  title='Arrastrar para mover'
+                                  className="edit-button"
+                                  draggable
+                                  onDragStart={() => handleDragStart(index)} // Start the drag
+                                  onTouchStart={() => handleTouchStart(index)} // Start the touch
+                                >
+                                  ↕️
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -375,25 +550,27 @@ const MenuRG = () => {
                 ))}
                 <li className="add-item">
                   AGREGAR NUEVO ELEMENTO
-                  {Object.entries(state.form).map(([key, value]) => (
-                    <div key={key}>
-                      <label>{key}</label>
-                      {typeof value === 'boolean' ? (
-                        <input
-                          type="checkbox"
-                          checked={value}
-                          onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.checked } })}
-                        />
-                      ) : (
-                        <input
-                          type={key.includes('precio') || key === 'list Order' ? 'number' : 'text'}
-                          value={value}
-                          placeholder={key}
-                          onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.value } })}
-                        />
-                      )}
-                    </div>
-                  ))}
+                  {Object.entries(state.form)
+                    .filter(([key]) => key !== 'list Order')
+                    .map(([key, value]) => (
+                      <div key={key}>
+                        <label>{key}</label>
+                        {typeof value === 'boolean' ? (
+                          <input
+                            type="checkbox"
+                            checked={value}
+                            onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.checked } })}
+                          />
+                        ) : (
+                          <input
+                            type={key.includes('precio') ? 'number' : 'text'}
+                            value={value}
+                            placeholder={key}
+                            onChange={(e) => dispatch({ type: 'UPDATE_FORM', payload: { [key]: e.target.value } })}
+                          />
+                        )}
+                      </div>
+                    ))}
                   <button className="add-button" onClick={() => handleAddItem(category.id)}>AGREGAR ELEMENTO ➕</button>
                 </li>
               </ul>
