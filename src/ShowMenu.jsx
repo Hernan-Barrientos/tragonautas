@@ -11,7 +11,7 @@ const ShowMenu = () => {
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState('');
 
-  const ServerUrl = "http://localhost:3001"; // API URL
+  const ServerUrl = process.env.REACT_APP_SERVER_URL || "http://192.168.1.44:3001";
 
   useEffect(() => {
     fetchCategories();
@@ -32,12 +32,15 @@ const ShowMenu = () => {
       console.error('Error fetching categories from the API:', error);
     }
   };
-
   const handleCategoryClick = (categoryName) => {
     const updatedCategories = categories.map((category) =>
       category.name === categoryName ? { ...category, selected: !category.selected } : { ...category, selected: false }
     );
     setCategories(updatedCategories);
+  };
+
+  const handleTouchMove = (e) => {
+    e.stopPropagation(); // Prevents event propagation to parent container
   };
 
   return (
@@ -66,8 +69,7 @@ const ShowMenu = () => {
               onClick={() => handleCategoryClick(category.name)}
             >
               <div className="category-name">{category.name}</div>
-            </div>
-            {category.selected && (
+            </div>            {category.selected && (
               <ul className="item-list">
                 {category.items.map((item) => (
                   <li key={item.id || item.nombre} className="menu-item">

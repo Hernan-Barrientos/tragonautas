@@ -2,8 +2,8 @@ import React, { useReducer, useEffect, useCallback, useRef, useState } from 'rea
 import './Menu.css';
 import logo from './images/logo-negro-1-240x241.png';
 import logoCoffee from './images/logo-blanco-1-240x241.png';
-
-const ServerUrl = "http://localhost:3001";
+//el actual
+const ServerUrl = process.env.REACT_APP_SERVER_URL || "http://192.168.1.44:3001";
 
 const initialState = {
   token: sessionStorage.getItem('jwtToken') || undefined,
@@ -49,6 +49,7 @@ const reducer = (state, action) => {
 const MenuRG = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [editCategoryNames, setEditCategoryNames] = useState({}); // Nuevo estado para nombres de categoría
   const dragItem = useRef();
   const dragOverItem = useRef();
 
@@ -199,16 +200,18 @@ const MenuRG = () => {
   };
 
   const handleEditCategory = async (categoryId) => {
-    if (!state.form['nombre de categoria']) return;
+    const newName = editCategoryNames[categoryId];
+    if (!newName) return;
     try {
       const response = await fetch(`${ServerUrl}/categories/${categoryId}`, {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify({ categoryName: state.form['nombre de categoria'] }),
+        body: JSON.stringify({ categoryName: newName }),
       });
       if (response.ok) {
         await fetchCategories();
         alert('Categoría modificada correctamente');
+        setEditCategoryNames((prev) => ({ ...prev, [categoryId]: '' }));
       } else {
         dispatch({ type: 'SET_ERROR', payload: 'Error al modificar la categoría' });
       }
@@ -450,13 +453,16 @@ const MenuRG = () => {
                   <input
                     type="text"
                     placeholder={category.name}
-                    value={state.form['nombre de categoria'] || ''}
+                    value={editCategoryNames[category.id] || ''}
                     onChange={(e) =>
-                      dispatch({ type: 'UPDATE_FORM', payload: { 'nombre de categoria': e.target.value } })
+                      setEditCategoryNames((prev) => ({
+                        ...prev,
+                        [category.id]: e.target.value,
+                      }))
                     }
                   />
-                  <button className="edit-button category-section" onClick={() => handleEditCategory(category.id)}>✅</button>
-                  <button className="delete-button category-section" onClick={() => handleDeleteCategory(category.id,category.name)}>❌</button>
+                  <button className="edit-button category-section" onClick={(e) => { e.stopPropagation(); handleEditCategory(category.id); }}>✅</button>
+                  <button className="delete-button category-section" onClick={(e) => { e.stopPropagation(); handleDeleteCategory(category.id, category.name); }}>❌</button>
                 </div>
               </div>
             </div>

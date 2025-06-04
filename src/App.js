@@ -7,7 +7,6 @@ import TestApi from './TestApi.jsx';
 import { TestArray } from './TestArray';
 import ShowMenu from './ShowMenu';
 import { TragonautasHome } from './TragonautasHome';
-import TestZone from './TestZone.jsx';
 
 function App() {
   const [showMenu, setShowMenu] = useState(true);

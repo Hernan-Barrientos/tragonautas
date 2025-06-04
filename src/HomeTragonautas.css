@@ -60,13 +60,21 @@ body {
     color: rgb(240, 240, 240);
     width: 100%;
     height: 50px;
-    font-size: 200%;
+    font-size: 150%;
     font-weight: bold;
     text-shadow: 0px 0px 10px rgb(124, 114, 69);
-  }
+}
+
+.telefono-home a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.telefono-home a:hover {
+    color: #e6ffdb;
+    text-decoration: underline;
+}
   
-
-
   /* Estilos del botón de la carta */
   
   .menurg {
@@ -135,75 +143,7 @@ body {
       min-width: 100px;
       max-width: 100px;
     }
-  }
-  
-  .tragonautas-menu-image-menu {
-    max-width: 150px;
-    max-height: 150px;
-  }
-  
-  /* Otros estilos */
-  
-  .moto {
-    width: auto;
-    height: 40px;
-    object-fit: cover;
-    object-position: center;
-    margin-right: 10px;
-  }
-  
-  /* Estilos de contacto */
-  
-  .telefono-home {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    margin-top: 10px;
-    color: rgb(240, 240, 240);
-    width: 100%;
-    height: 50px;
-    font-size: 150%;
-    font-weight: bold;
-    text-shadow: 0px 0px 10px rgb(124, 114, 69);
-  
-  }
-  
-  
-  .telefono-home a {
-    color: #fff;
-    text-decoration: none;
-  }
-  
-  .telefono-home a:hover {
-    color: #e6ffdb;
-    text-decoration: underline;
-  }
-  
-  .dire {
-    color: rgb(255, 255, 255);
-  }
-  
-  /* Estilos de las redes sociales */
-  
-  .wsapplogo {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
 
-  }
-  
-  .iglogo {
-    width: 35px;
-    height: 35px;
-    margin-right: 10px;
-    -webkit-filter: drop-shadow(5px 5px 5px #222);
-    filter: drop-shadow(0px 0px 5px #797979);
-  }
-  
-  /* Media Queries para adaptar a pantallas más pequeñas */
-  
-  @media screen and (max-width: 500px) {
     .menu {
       min-width: 100%;
     }
@@ -264,3 +204,59 @@ body {
     }
   }
   
+  /* Otros estilos */
+  
+  .moto {
+    width: auto;
+    height: 40px;
+    object-fit: cover;
+    object-position: center;
+    margin-right: 10px;
+  }
+  
+  /* Estilos de contacto */
+  
+  .telefono-home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-top: 10px;
+    color: rgb(240, 240, 240);
+    width: 100%;
+    height: 50px;
+    font-size: 150%;
+    font-weight: bold;
+    text-shadow: 0px 0px 10px rgb(124, 114, 69);
+}
+
+.telefono-home a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.telefono-home a:hover {
+    color: #e6ffdb;
+    text-decoration: underline;
+}
+  
+  .dire {
+    color: rgb(255, 255, 255);
+  }
+  
+  /* Estilos de las redes sociales */
+  
+  .wsapplogo {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+
+  }
+  
+  .iglogo {
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+    -webkit-filter: drop-shadow(5px 5px 5px #222);
+    filter: drop-shadow(0px 0px 5px #797979);
+  }

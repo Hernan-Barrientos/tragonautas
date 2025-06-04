@@ -7,7 +7,7 @@ const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -22,12 +22,13 @@ const pool = mysql.createPool({
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwt';
 
+// Enhanced error handling for database queries
 const executeQuery = (query, values = []) => {
   return new Promise((resolve, reject) => {
     pool.query(query, values, (err, results) => {
       if (err) {
         console.error('Error en la consulta SQL:', err);
-        return reject(err);
+        return reject(new Error('Error en la base de datos'));
       }
       resolve(results);
     });
@@ -115,11 +116,20 @@ app.get('/categories', async (req, res) => {
   }
 });
 
-app.post('/categories', requireAuth, [body('categoryName').isString().notEmpty()], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+// Middleware to validate and sanitize inputs
+const validateCategoryName = [
+  body('categoryName').isString().trim().notEmpty().withMessage('El nombre de la categoría es obligatorio'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
+// Updated POST /categories endpoint with validation and error handling
+app.post('/categories', requireAuth, validateCategoryName, async (req, res) => {
   try {
     const { categoryName } = req.body;
     await executeQuery('INSERT INTO categories (name) VALUES (?)', [categoryName]);
@@ -148,6 +158,7 @@ app.put('/categories/:categoryId', requireAuth, [body('categoryName').isString()
   }
 });
 
+// Updated DELETE /categories/:categoryId endpoint with enhanced error handling
 app.delete('/categories/:categoryId', requireAuth, async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -294,6 +305,6 @@ app.put('/categories/order', requireAuth, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
 });

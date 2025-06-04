@@ -27,7 +27,6 @@ body {
 .menu {
   background-color: var(--background-color);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
   text-align: center;
   align-items: stretch;
   min-width: 270px;
@@ -52,7 +51,7 @@ body {
 /* Media query para tablets */
 @media screen and (min-width: 768px) and (max-width: 1023px) {
   .menu {
-    max-width: 90%;
+    max-width: 100%;
     margin: 0 auto;
   }
 }
@@ -86,7 +85,7 @@ body {
   color: var(--text-color);
   border: none;
   border-radius: 8px;
-  padding: 10px;
+  padding: 10px 0 10px 0;
   font-size: 18px;
   font-weight: bold;
   text-transform: uppercase;
@@ -135,6 +134,9 @@ body {
     width: 100%;
     min-width: 250px;
     flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+    /*padding: 0 5px;*/
   }
 }
 
@@ -149,6 +151,16 @@ body {
   background-color: #fffcf7;
 }
 
+@media screen and (max-width: 767px) {
+  .category-actions input[type="text"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 0px;
+
+  }
+}
+
 .category-section {
   width: 40px;
   height: 32px;
@@ -161,7 +173,6 @@ body {
 
 .edit-button {
   background-color: var(--gradient-end);
-  border-radius: 20%;
   border: none;
 }
 
@@ -211,9 +222,9 @@ body {
 
 .menu-item {
   background-color: #ffffff;
-  border: 1px solid var(--primary-color);
+  /*border: 1px solid var(--primary-color);*/
   border-radius: 8px;
-  padding: 15px;
+  padding: 15px 0px 15px 0px;
   margin-bottom: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -221,15 +232,9 @@ body {
   align-items: center;
   width: 100%;
   max-width: 700px;
-  min-width: 250px;
+  min-width: 200px;
 }
 
-@media screen and (max-width: 767px) {
-  .menu-item {
-    width: 100%;
-    min-width: 250px;
-  }
-}
 
 .menu-item:hover {
   background-color: var(--button-hover); /* Consistente con botones */
@@ -516,7 +521,6 @@ body {
   color: var(--text-color);
   border: none;
   border-radius: 8px;
-  padding: 10px 15px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -541,3 +545,55 @@ body {
   border-radius: 0;
   box-sizing: border-box;
 }
+
+
+@media screen and (max-width: 767px) {
+  .category-button,
+  .category-actions,
+  .add-category-button,
+  .add-item,
+  .menu-item,
+  .item-details,
+  .inputItems,
+  .category-section,
+  .edit-button,
+  .delete-button,
+  .add-button,
+  .pass-button {
+    border-radius: 0 !important;
+  }
+
+  .category-actions {
+    flex-wrap: wrap;
+    /*gap: 5px;
+    margin-top: 5px;
+    padding: 0 5px;*/
+  }
+
+  .category-actions input[type="text"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .add-category {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .add-category-button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .add-item {
+    padding: 10px 5px;
+  }
+
+  .menu-item {
+    margin-bottom: 10px;
+    padding: 10px 0px;
+  }
+}
+
